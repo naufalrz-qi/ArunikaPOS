@@ -4,7 +4,7 @@ from django_q.models import Schedule
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from app_core.models import ServerConfig, SyncLog
-from .tasks import task_full_sync, task_auto_sync, task_sequential_auto_sync
+from .tasks import task_full_sync, task_auto_sync, task_sequential_auto_sync, SYNC_ORDER, TRANSAKSI_SYNC_ORDER
 
 @login_required
 def sync_control(request):
@@ -36,8 +36,10 @@ def trigger_sync(request):
             )
             
             if sync_type == 'full':
+                log.details = {tbl: {'current': 0, 'total': 0, 'status': 'pending'} for tbl, _, _ in SYNC_ORDER}
                 task_id = async_task('app_sync.tasks.task_full_sync', log.id, server.id)
             elif sync_type == 'auto':
+                log.details = {model._meta.db_table: {'current': 0, 'total': 0, 'status': 'pending'} for model, _, _, _ in TRANSAKSI_SYNC_ORDER}
                 start_date = request.POST.get('start_date')
                 end_date = request.POST.get('end_date')
                 task_id = async_task('app_sync.tasks.task_auto_sync', log.id, server.id, start_date, end_date)
