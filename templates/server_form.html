@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | Arunika POS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+        <a href="{% url 'server_list' %}" style="font-size: 14px; margin-bottom: 8px; display: inline-block;">&larr; Kembali ke daftar</a>
+        <h1>{{ title }}</h1>
+    </div>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div style="margin-bottom: 24px;">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <div style="font-size: 12px; color: var(--color-body-muted); margin-top: -16px; margin-bottom: 8px;">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="font-size: 12px; color: #ff3b30; margin-top: -16px; margin-bottom: 8px;">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <div style="margin-top: 32px; display: flex; gap: 16px;">
+            <button type="submit" class="btn-accent">Simpan Server</button>
+            <a href="{% url 'server_list' %}" class="btn-ghost">Batal</a>
+        </div>
+    </form>
+</div>
+<style>
+    /* Styling checkbox in form */
+    input[type="checkbox"] {
+        width: auto;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}

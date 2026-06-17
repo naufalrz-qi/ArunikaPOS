@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}Riwayat Log Sinkronisasi | Arunika POS{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --apple-primary: #0066cc;
+        --apple-primary-active: #0071e3;
+        --apple-ink: #1d1d1f;
+        --apple-canvas: #ffffff;
+        --apple-parchment: #f5f5f7;
+        --apple-tile-dark: #272729;
+        --apple-on-dark: #ffffff;
+        --apple-body-muted: #8e8e93;
+        --apple-hairline: #e0e0e0;
+        --apple-font-display: "SF Pro Display", system-ui, -apple-system, sans-serif;
+        --apple-font-text: "SF Pro Text", system-ui, -apple-system, sans-serif;
+    }
+    body {
+        background-color: var(--apple-parchment) !important;
+        color: var(--apple-ink);
+        font-family: var(--apple-font-text);
+    }
+    .apple-heading {
+        font-family: var(--apple-font-display);
+        letter-spacing: -0.01em;
+        color: var(--apple-ink);
+        font-weight: 600;
+        margin: 0;
+    }
+    .apple-heading-lg {
+        font-size: 40px;
+        line-height: 1.1;
+    }
+    .apple-heading-md {
+        font-size: 34px;
+        line-height: 1.47;
+    }
+    .apple-body {
+        font-family: var(--apple-font-text);
+        color: var(--apple-ink);
+        font-size: 17px;
+        line-height: 1.47;
+        letter-spacing: -0.374px;
+    }
+    .apple-pill-btn-outline {
+        background-color: transparent;
+        color: var(--apple-primary);
+        border: 1px solid var(--apple-primary);
+        border-radius: 9999px;
+        padding: 11px 22px;
+        font-family: var(--apple-font-text);
+        font-size: 17px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .apple-pill-btn-outline:active {
+        transform: scale(0.95);
+    }
+    .apple-card {
+        background: var(--apple-canvas);
+        border: 1px solid var(--apple-hairline);
+        border-radius: 18px;
+        padding: 0; /* padding applied inside children */
+        box-shadow: none;
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+    .apple-card-header {
+        padding: 24px;
+        border-bottom: 1px solid var(--apple-hairline);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--apple-canvas);
+    }
+    .apple-card-body {
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 32px;
+        background: var(--apple-canvas);
+    }
+    .apple-badge-success {
+        color: #34c759;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.224px;
+        text-transform: capitalize;
+    }
+    .apple-badge-error {
+        color: #ff3b30;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.224px;
+        text-transform: capitalize;
+    }
+    .apple-badge-running {
+        color: var(--apple-primary);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.224px;
+        text-transform: capitalize;
+    }
+    .apple-caption {
+        font-size: 14px;
+        color: var(--apple-body-muted);
+        letter-spacing: -0.224px;
+    }
+    .apple-table-card {
+        border: 1px solid var(--apple-hairline);
+        padding: 12px 16px;
+        border-radius: 11px; /* md radius */
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        background: var(--apple-canvas);
+    }
+</style>
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; padding-top: 24px;">
+    <div>
+        <h1 class="apple-heading apple-heading-lg">Riwayat Log</h1>
+        <p class="apple-body" style="color: var(--apple-body-muted); margin-top: 8px;">Aktivitas sinkronisasi data master dan transaksi.</p>
+    </div>
+    <a href="/sync/" class="apple-pill-btn-outline">Kembali</a>
+</div>
+
+<div>
+    {% for log in logs %}
+    <div class="apple-card">
+        
+        <!-- Log Header -->
+        <div class="apple-card-header">
+            <div style="display: flex; gap: 24px; align-items: center;">
+                <div>
+                    <h3 class="apple-heading" style="font-size: 21px; margin-bottom: 4px;">
+                        {% if log.jenis == 'full_sync' %}Sinkronisasi Master
+                        {% elif log.jenis == 'auto_sync' %}Tarik Transaksi Manual
+                        {% elif log.jenis == 'auto_sync_3d' %}Tarik Transaksi Otomatis
+                        {% else %}{{ log.jenis|title }}{% endif %}
+                    </h3>
+                    <div class="apple-caption">
+                        Target: <strong style="color: var(--apple-ink);">{{ log.server.nama|default:"Semua Server" }}</strong>
+                    </div>
+                </div>
+                
+                <div class="
+                    {% if log.status == 'success' %}apple-badge-success
+                    {% elif log.status == 'failed' %}apple-badge-error
+                    {% elif log.status == 'running' %}apple-badge-running
+                    {% else %}apple-caption{% endif %}
+                ">
+                    {{ log.status }}
+                </div>
+            </div>
+            <div class="apple-caption" style="text-align: right;">
+                <div>Mulai: <strong style="color: var(--apple-ink);">{{ log.mulai_pada|date:"d M Y, H:i" }}</strong></div>
+                {% if log.selesai_pada %}
+                <div>Selesai: <strong style="color: var(--apple-ink);">{{ log.selesai_pada|date:"d M Y, H:i" }}</strong></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Log Body -->
+        <div class="apple-card-body">
+            <!-- Summary Stats -->
+            <div>
+                <h4 style="font-size: 14px; color: var(--apple-body-muted); margin-bottom: 16px; font-weight: 600;">Ringkasan</h4>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <div style="font-size: 34px; font-weight: 600; color: var(--apple-ink); letter-spacing: -0.01em; line-height: 1.1;">
+                            {{ log.data_baru|default:"0" }}
+                        </div>
+                        <div class="apple-caption" style="margin-top: 4px;">Baris disinkronisasi</div>
+                    </div>
+                    
+                    {% if log.status == 'failed' %}
+                    <div style="margin-top: 8px;">
+                        <div style="font-size: 14px; font-weight: 600; color: #ff3b30; margin-bottom: 4px;">Pesan Sistem:</div>
+                        <div style="font-size: 14px; color: #ff3b30; line-height: 1.4;">{{ log.pesan_error }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Table Details -->
+            <div>
+                <h4 style="font-size: 14px; color: var(--apple-body-muted); margin-bottom: 16px; font-weight: 600;">Rincian Tabel</h4>
+                {% if log.details %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+                    {% for tbl, data in log.details.items %}
+                    <div class="apple-table-card">
+                        <div style="font-size: 14px; color: var(--apple-ink); font-family: 'SF Mono', ui-monospace, monospace;">{{ tbl }}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px;">
+                            <span style="font-size: 21px; font-weight: 600; color: var(--apple-ink); line-height: 1;">{{ data.current }}</span>
+                            <span style="font-size: 12px;
+                                {% if data.status == 'done' %}color: #34c759;
+                                {% elif data.status == 'syncing' %}color: var(--apple-primary);
+                                {% else %}color: var(--apple-body-muted);{% endif %}
+                            ">
+                                {{ data.status|title }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="apple-caption" style="font-style: italic;">
+                    Tidak ada rincian tercatat.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div style="text-align: center; padding: 80px 0; color: var(--apple-body-muted);">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px; opacity: 0.5;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <h3 class="apple-heading" style="font-size: 21px; margin-bottom: 8px;">Belum ada riwayat</h3>
+        <p class="apple-body" style="color: var(--apple-body-muted);">Aktivitas sinkronisasi akan muncul di sini setelah dieksekusi.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

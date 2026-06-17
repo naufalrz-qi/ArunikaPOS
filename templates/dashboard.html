@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Arunika POS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p>Ringkasan sistem sinkronisasi POS</p>
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <h3>Status Koneksi Server</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Server</th>
+                <th>Tipe</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for server in servers %}
+            <tr>
+                <td>{{ server.nama }}</td>
+                <td style="text-transform: uppercase;">{{ server.tipe }}</td>
+                <td style="color: {% if server.is_active %}#34c759{% else %}var(--color-body-muted){% endif %}; font-weight: 600;">
+                    {% if server.is_active %}● AKTIF{% else %}● NONAKTIF{% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" style="text-align: center; color: var(--color-body-muted);">Belum ada server dikonfigurasi.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="card" style="text-align: center; padding: 2rem;">
+        <div style="font-size: 14px; color: var(--color-body-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 8px;">Total Barang</div>
+        <div style="font-size: 48px; font-weight: 600; letter-spacing: -0.03em;">{{ total_barang }}</div>
+    </div>
+    <div class="card" style="text-align: center; padding: 2rem;">
+        <div style="font-size: 14px; color: var(--color-body-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 8px;">Total Customer</div>
+        <div style="font-size: 48px; font-weight: 600; letter-spacing: -0.03em;">{{ total_customer }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0;">Log Sync Terbaru</h3>
+        <a href="/sync/" class="btn-ghost">Ke Pusat Kontrol</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Waktu</th>
+                <th>Server</th>
+                <th>Jenis</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in recent_logs %}
+            <tr>
+                <td>{{ log.mulai_pada|date:"d M Y, H:i" }}</td>
+                <td>{{ log.server.nama }}</td>
+                <td style="text-transform: uppercase;">{{ log.jenis }}</td>
+                <td>
+                    <span style="padding: 4px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; border-radius: 980px;
+                        {% if log.status == 'success' %}color: #34c759; background-color: rgba(52, 199, 89, 0.1);
+                        {% elif log.status == 'failed' %}color: #ff3b30; background-color: rgba(255, 59, 48, 0.1);
+                        {% elif log.status == 'running' %}color: #0066cc; background-color: rgba(0, 102, 204, 0.1);
+                        {% else %}color: #ff9500; background-color: rgba(255, 149, 0, 0.1);{% endif %}">
+                        {{ log.status }}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align: center; color: var(--color-body-muted);">Belum ada histori sync.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

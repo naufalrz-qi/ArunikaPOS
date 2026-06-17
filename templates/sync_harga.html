@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Sync Harga Manual | Arunika POS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Sinkronisasi Harga (Manual)</h1>
+    <p>Penyesuaian manual harga antar server</p>
+</div>
+
+<div class="card">
+    <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+        <input type="text" placeholder="Cari Kode atau Nama Barang..." style="margin-bottom: 0;">
+        <select style="margin-bottom: 0; width: auto; min-width: 200px;">
+            <option value="">Semua Kategori</option>
+        </select>
+        <button class="btn-accent" style="padding: 0 32px;">CARI</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 40px;"><input type="checkbox"></th>
+                <th>Kode Barang</th>
+                <th>Nama Barang</th>
+                <th>Harga Gudang (Master)</th>
+                <th>Harga Grosir</th>
+                <th>Harga Retail</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="6" style="text-align: center; color: var(--color-body-muted);">(Data belum diload)</td></tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 32px; display: flex; justify-content: flex-end;">
+        <button class="btn-accent">SYNC HARGA TERPILIH</button>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,532 @@
+{% extends 'base.html' %}
+
+{% block title %}Pusat Kontrol Sync | Arunika POS{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --apple-primary: #0066cc;
+        --apple-primary-active: #0071e3;
+        --apple-ink: #1d1d1f;
+        --apple-canvas: #ffffff;
+        --apple-parchment: #f5f5f7;
+        --apple-tile-dark: #272729;
+        --apple-on-dark: #ffffff;
+        --apple-body-muted: #8e8e93;
+        --apple-hairline: #e0e0e0;
+        --apple-font-display: "SF Pro Display", system-ui, -apple-system, sans-serif;
+        --apple-font-text: "SF Pro Text", system-ui, -apple-system, sans-serif;
+    }
+    body {
+        background-color: var(--apple-parchment) !important;
+        color: var(--apple-ink);
+        font-family: var(--apple-font-text);
+    }
+    .apple-heading {
+        font-family: var(--apple-font-display);
+        letter-spacing: -0.01em;
+        color: var(--apple-ink);
+        font-weight: 600;
+        margin: 0;
+    }
+    .apple-heading-lg {
+        font-size: 40px;
+        line-height: 1.1;
+    }
+    .apple-heading-md {
+        font-size: 34px;
+        line-height: 1.47;
+    }
+    .apple-heading-sm {
+        font-size: 21px; /* tagline */
+        line-height: 1.19;
+    }
+    .apple-body {
+        font-family: var(--apple-font-text);
+        color: var(--apple-ink);
+        font-size: 17px;
+        line-height: 1.47;
+        letter-spacing: -0.374px;
+    }
+    .apple-pill-btn {
+        background-color: var(--apple-primary);
+        color: #ffffff;
+        border-radius: 9999px;
+        padding: 11px 22px;
+        font-family: var(--apple-font-text);
+        font-size: 17px;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s, background-color 0.2s;
+        text-align: center;
+        display: inline-block;
+        font-weight: 400;
+    }
+    .apple-pill-btn:active {
+        transform: scale(0.95);
+        background-color: var(--apple-primary-active);
+    }
+    .apple-pill-btn-outline {
+        background-color: transparent;
+        color: var(--apple-primary);
+        border: 1px solid var(--apple-primary);
+        border-radius: 9999px;
+        padding: 11px 22px;
+        font-family: var(--apple-font-text);
+        font-size: 17px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        text-align: center;
+        text-decoration: none;
+    }
+    .apple-pill-btn-outline:active {
+        transform: scale(0.95);
+    }
+    .apple-card {
+        background: var(--apple-canvas);
+        border: 1px solid var(--apple-hairline);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: none;
+    }
+    .apple-danger-card {
+        background: var(--apple-canvas);
+        border: 1px solid var(--apple-hairline);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: none;
+    }
+    .apple-danger-btn {
+        background-color: transparent;
+        color: #ff3b30;
+        border: 1px solid rgba(255, 59, 48, 0.3);
+        border-radius: 8px; /* utility size */
+        padding: 8px 15px;
+        font-family: var(--apple-font-text);
+        font-size: 14px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .apple-danger-btn:active {
+        transform: scale(0.95);
+    }
+    /* Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #d2d2d7;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 24px;
+      width: 24px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+    input:checked + .slider { background-color: #34c759; }
+    input:checked + .slider:before { transform: translateX(22px); }
+    
+    .console-dark {
+        background-color: var(--apple-tile-dark);
+        border-radius: 18px;
+        padding: 32px;
+        color: var(--apple-on-dark);
+        border: none;
+        box-shadow: none;
+    }
+    .apple-input {
+        font-family: var(--apple-font-text);
+        padding: 12px 20px;
+        border-radius: 9999px; /* search-input style */
+        border: 1px solid var(--apple-hairline);
+        background: var(--apple-canvas);
+        color: var(--apple-ink);
+        font-size: 17px;
+        width: 100%;
+        box-sizing: border-box;
+        outline: none;
+    }
+    .apple-input:focus {
+        border-color: var(--apple-primary);
+    }
+    select.apple-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231d1d1f%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat, repeat;
+        background-position: right 1.2em top 50%, 0 0;
+        background-size: .65em auto, 100%;
+    }
+</style>
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; padding-top: 24px;">
+    <div>
+        <h1 class="apple-heading apple-heading-lg">Pusat Kontrol</h1>
+        <p class="apple-body" style="color: var(--apple-body-muted); margin-top: 8px;">Kelola dan monitor sinkronisasi antar perangkat.</p>
+    </div>
+    <a href="/sync/log/" class="apple-pill-btn-outline">Riwayat Log</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start;">
+
+    <!-- Bagian Kiri: Kontrol -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <div class="apple-card">
+            <label for="server-select" style="font-size: 14px; color: var(--apple-body-muted); margin-bottom: 8px; display: block;">Target Sinkronisasi</label>
+            <select id="server-select" class="apple-input">
+                <option value="all">Semua Perangkat Aktif</option>
+                {% for server in servers %}
+                    <option value="{{ server.id }}">{{ server.nama }} ({{ server.tipe }})</option>
+                {% empty %}
+                    <option value="">Tidak ada perangkat</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="apple-card">
+            <h3 class="apple-heading apple-heading-sm" style="margin-bottom: 24px; border-bottom: 1px solid var(--apple-hairline); padding-bottom: 12px;">Mode Eksekusi</h3>
+            
+            <div style="margin-bottom: 32px;">
+                <h4 style="font-size: 17px; margin-bottom: 8px; font-weight: 600;">Data Master</h4>
+                <p style="font-size: 14px; color: var(--apple-body-muted); margin-bottom: 16px;">Sinkronisasi seluruh katalog produk, pelanggan, dan kategori tanpa terkecuali.</p>
+                <button onclick="startSync('full')" class="apple-pill-btn" style="width: 100%;">Mulai Full Sync</button>
+            </div>
+            
+            <div style="margin-bottom: 32px; border-top: 1px solid var(--apple-hairline); padding-top: 24px;">
+                <h4 style="font-size: 17px; margin-bottom: 8px; font-weight: 600;">Data Transaksi</h4>
+                <p style="font-size: 14px; color: var(--apple-body-muted); margin-bottom: 16px;">Tarik transaksi berdasar rentang tanggal secara berurutan.</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                    <input type="date" id="start-date" class="apple-input">
+                    <input type="date" id="end-date" class="apple-input">
+                </div>
+                
+                <button onclick="startSync('auto')" class="apple-pill-btn-outline" style="width: 100%;">Tarik Transaksi</button>
+            </div>
+
+            <div style="border-top: 1px solid var(--apple-hairline); padding-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="font-size: 17px; margin: 0; font-weight: 600;">Otomatisasi</h4>
+                    <p style="font-size: 12px; color: var(--apple-body-muted); margin: 4px 0 0 0;">Berjalan berkala (15mnt)</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="toggle-auto" {% if auto_sync_active %}checked{% endif %} onchange="toggleAutoSync(this)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="apple-danger-card">
+            <h4 style="font-size: 17px; color: #ff3b30; margin-bottom: 8px; font-weight: 600;">Reset Pabrik</h4>
+            <p style="font-size: 12px; color: var(--apple-body-muted); margin-bottom: 16px;">Format seluruh data hasil sinkronisasi secara instan. Hanya gunakan jika diperlukan.</p>
+            <button onclick="emptyDatabase()" class="apple-danger-btn">Kosongkan Database</button>
+        </div>
+    </div>
+
+    <!-- Bagian Kanan: Console -->
+    <div class="console-dark">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+            <div>
+                <h3 class="apple-heading apple-heading-md apple-heading-dark" style="color: #ffffff;">Live Console</h3>
+                <span id="progress-title" style="color: #8e8e93; font-size: 14px; margin-top: 8px; display: block;">Menunggu koneksi...</span>
+            </div>
+            <button onclick="cancelSync()" id="btn-cancel" style="background: transparent; color: #ff3b30; border: none; font-family: var(--apple-font-text); font-size: 14px; cursor: pointer; display: none;">Batalkan</button>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+            <div style="width: 100%; background: #3a3a3c; border-radius: 9999px; height: 6px; overflow: hidden;">
+                <div id="progress-bar" style="height: 100%; background: var(--apple-primary); width: 0%; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 12px; color: #8e8e93;">
+                <span id="progress-table">Idle</span>
+                <span id="progress-pct" style="color: var(--apple-on-dark); font-variant-numeric: tabular-nums;">0%</span>
+            </div>
+        </div>
+
+        <div id="console-logs" style="font-family: 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, monospace; font-size: 13px; line-height: 1.6; color: #d2d2d7; max-height: 600px; overflow-y: auto; padding-right: 8px;">
+            <div>Apple Sync Engine 2.0</div>
+            <div style="color: #8e8e93;">Pilih target dan eksekusi untuk memulai.</div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+let pollInterval;
+let activeTaskIds = [];
+
+function startSync(type) {
+    const serverId = document.getElementById('server-select').value;
+    if (!serverId) {
+        if(typeof Swal !== 'undefined') Swal.fire('Peringatan', 'Pilih server target.', 'warning');
+        else alert('Pilih server target.');
+        return;
+    }
+
+    const title = type === 'full' ? 'Full Sync' : 'Transaksi';
+    document.getElementById('progress-title').innerText = `Menjalankan: ${title}`;
+    document.getElementById('progress-bar').style.width = '0%';
+    document.getElementById('progress-bar').style.background = 'var(--apple-primary)';
+    document.getElementById('progress-pct').innerText = '0%';
+    document.getElementById('progress-table').innerText = 'Menyiapkan modul...';
+    
+    document.getElementById('btn-cancel').style.display = 'block';
+    document.getElementById('btn-cancel').disabled = false;
+    document.getElementById('btn-cancel').innerText = 'Batalkan';
+    
+    document.getElementById('console-logs').innerHTML = `<div style="color: var(--apple-primary);">Memulai eksekusi task paralel...</div>`;
+
+    if(pollInterval) clearInterval(pollInterval);
+
+    let bodyData = `server_id=${serverId}&sync_type=${type}`;
+    if (type === 'auto') {
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+        if (startDate && endDate) {
+            bodyData += `&start_date=${startDate} 00:00:00&end_date=${endDate} 23:59:59`;
+        } else {
+            if(typeof Swal !== 'undefined') Swal.fire('Peringatan', 'Tentukan rentang tanggal.', 'warning');
+            else alert('Tentukan rentang tanggal.');
+            return;
+        }
+    }
+
+    const csrfToken = '{{ csrf_token }}';
+
+    fetch('/sync/trigger/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: bodyData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            activeTaskIds = data.task_ids;
+            document.getElementById('console-logs').innerHTML += `<div>Task ID dialokasikan. Terkoneksi ke cluster.</div>`;
+            pollTaskStatus(data.task_ids);
+        } else {
+            if(typeof Swal !== 'undefined') Swal.fire('Error', data.message || 'Gagal memulai.', 'error');
+            else alert(data.message || 'Gagal memulai.');
+            document.getElementById('console-logs').innerHTML += `<div style="color: #ff3b30;">Gagal: ${data.message}</div>`;
+            document.getElementById('btn-cancel').style.display = 'none';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('console-logs').innerHTML += `<div style="color: #ff3b30;">Koneksi terputus.</div>`;
+        document.getElementById('btn-cancel').style.display = 'none';
+    });
+}
+
+function renderConsole(details) {
+    if (!details) return;
+    let html = '';
+    for (const [tbl, tblData] of Object.entries(details)) {
+        let statusText = '';
+        let color = '';
+        if (tblData.status === 'done') {
+            statusText = 'Selesai';
+            color = '#34c759'; 
+        } else if (tblData.status === 'syncing') {
+            statusText = 'Syncing...';
+            color = 'var(--apple-primary)'; 
+        } else {
+            statusText = 'Menunggu';
+            color = '#8e8e93'; 
+        }
+        
+        html += `<div style="color: ${color}; margin-bottom: 4px; display: flex; justify-content: space-between;"><span>${tbl} [${tblData.current}/${tblData.total}]</span><span>${statusText}</span></div>`;
+    }
+    document.getElementById('console-logs').innerHTML = html;
+}
+
+function pollTaskStatus(taskIds) {
+    if(!taskIds || taskIds.length === 0) return;
+    
+    pollInterval = setInterval(() => {
+        let fetchPromises = taskIds.map(tid => fetch(`/api/task-status/${tid}/`).then(res => res.json()));
+        
+        Promise.all(fetchPromises).then(results => {
+            let combinedDetails = {};
+            let isAllDone = true;
+            let hasError = false;
+            let errorMessage = '';
+            let totalPct = 0;
+            
+            results.forEach((data, index) => {
+                let sId = taskIds[index].substring(0,6);
+                if (data.details) {
+                    for (const [tbl, tblData] of Object.entries(data.details)) {
+                        let key = taskIds.length > 1 ? `[Svr-${sId}] ${tbl}` : tbl;
+                        combinedDetails[key] = tblData;
+                    }
+                }
+                
+                if (data.status === 'error') {
+                    hasError = true;
+                    errorMessage = data.message;
+                } else if (data.status === 'cancelled') {
+                    hasError = true;
+                    errorMessage = 'Sinkronisasi dibatalkan.';
+                }
+                
+                if (data.status !== 'done' && data.status !== 'error' && data.status !== 'cancelled') {
+                    isAllDone = false;
+                }
+                totalPct += (data.pct || 0);
+            });
+            
+            let avgPct = totalPct / results.length;
+            
+            renderConsole(combinedDetails);
+            
+            document.getElementById('progress-bar').style.width = avgPct + '%';
+            document.getElementById('progress-pct').innerText = avgPct.toFixed(1) + '%';
+            
+            if (hasError) {
+                clearInterval(pollInterval);
+                document.getElementById('progress-bar').style.background = '#ff3b30';
+                document.getElementById('progress-title').innerText = 'Kesalahan';
+                document.getElementById('progress-table').innerText = errorMessage || 'Terjadi kesalahan sistem.';
+                document.getElementById('btn-cancel').style.display = 'none';
+            } else if (isAllDone) {
+                clearInterval(pollInterval);
+                document.getElementById('progress-bar').style.background = '#34c759';
+                document.getElementById('progress-title').innerText = 'Selesai';
+                document.getElementById('progress-table').innerText = 'Semua tugas telah dieksekusi.';
+                document.getElementById('btn-cancel').style.display = 'none';
+            } else {
+                document.getElementById('progress-table').innerText = 'Memproses batch data...';
+            }
+        });
+    }, 2000);
+}
+
+function cancelSync() {
+    if (!activeTaskIds || activeTaskIds.length === 0) return;
+    document.getElementById('btn-cancel').innerText = 'Membatalkan...';
+    document.getElementById('btn-cancel').disabled = true;
+    
+    fetch('/sync/cancel/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({task_ids: activeTaskIds})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.success) {
+            document.getElementById('console-logs').innerHTML += `<div style="color: #ff9500;">Mengirim sinyal pembatalan.</div>`;
+        }
+    });
+}
+
+function toggleAutoSync(checkbox) {
+    const action = checkbox.checked ? 'enable' : 'disable';
+    fetch('/sync/toggle_auto/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `action=${action}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(!data.success) {
+            checkbox.checked = !checkbox.checked;
+        }
+    })
+    .catch(() => {
+        checkbox.checked = !checkbox.checked;
+    });
+}
+
+function emptyDatabase() {
+    if(typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Hapus Semua Data',
+            text: "Ini akan menghapus secara permanen semua master dan transaksi hasil sinkronisasi.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff3b30',
+            cancelButtonColor: '#2a2a35',
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Autentikasi Lanjutan',
+                    text: 'Masukkan password database untuk memverifikasi tindakan ini:',
+                    input: 'password',
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                        autocorrect: 'off'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Verifikasi & Hapus',
+                    cancelButtonText: 'Batal',
+                    showLoaderOnConfirm: true,
+                    preConfirm: (password) => {
+                        return fetch('/sync/empty_database/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({ db_password: password })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error(data.message)
+                            }
+                            return data
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Autentikasi gagal: ${error.message}`)
+                        })
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result2) => {
+                    if (result2.isConfirmed) {
+                        Swal.fire({
+                            title: 'Dihapus',
+                            text: 'Sistem telah dikosongkan.',
+                            icon: 'success',
+                            confirmButtonColor: '#0066cc'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                })
+            }
+        })
+    }
+}
+</script>
+{% endblock %}

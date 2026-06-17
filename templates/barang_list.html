@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Master Barang | Arunika POS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Master Barang</h1>
+    <p>Data barang dari Gudang Master</p>
+</div>
+
+<div class="card">
+    <div style="margin-bottom: 24px;">
+        <form method="get" style="display: flex; gap: 16px; align-items: flex-start;">
+            <div style="flex: 1;">
+                <div style="display: flex; gap: 16px;">
+                    <input type="text" name="q" value="{{ query }}" placeholder="Cari Kode atau Nama Barang..." style="margin-bottom: 0; flex: 1;">
+                    <button type="submit" class="btn-accent" style="padding: 0 32px;">CARI</button>
+                </div>
+                
+                <details style="margin-top: 12px;">
+                    <summary style="cursor: pointer; font-size: 13px; color: var(--color-primary); font-weight: 500; outline: none;">+ Advanced Filter & Sorting</summary>
+                    <div style="margin-top: 12px; padding: 16px; background: var(--color-surface-pearl); border-radius: 12px; border: 1px solid var(--color-hairline); display: flex; gap: 16px;">
+                        
+                        <div style="flex: 1;">
+                            <label style="font-size: 12px; font-weight: 600; color: var(--color-body-muted);">Kategori</label>
+                            <select name="kategori" style="width: 100%; margin-top: 4px;">
+                                <option value="">Semua Kategori</option>
+                                {% for kat in kategori_list %}
+                                <option value="{{ kat.kd_kategori }}" {% if filter_kategori == kat.kd_kategori %}selected{% endif %}>{{ kat.nama }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div style="flex: 1;">
+                            <label style="font-size: 12px; font-weight: 600; color: var(--color-body-muted);">Status</label>
+                            <select name="status" style="width: 100%; margin-top: 4px;">
+                                <option value="">Semua Status</option>
+                                <option value="1" {% if filter_status == '1' %}selected{% endif %}>Aktif</option>
+                                <option value="0" {% if filter_status == '0' %}selected{% endif %}>Nonaktif</option>
+                                <option value="2" {% if filter_status == '2' %}selected{% endif %}>Aktif No Display</option>
+                            </select>
+                        </div>
+                        
+                        <div style="flex: 1;">
+                            <label style="font-size: 12px; font-weight: 600; color: var(--color-body-muted);">Urutkan</label>
+                            <select name="sort" style="width: 100%; margin-top: 4px;">
+                                <option value="kd_barang" {% if sort == 'kd_barang' %}selected{% endif %}>Kode Barang (A-Z)</option>
+                                <option value="-kd_barang" {% if sort == '-kd_barang' %}selected{% endif %}>Kode Barang (Z-A)</option>
+                                <option value="nama" {% if sort == 'nama' %}selected{% endif %}>Nama Barang (A-Z)</option>
+                                <option value="-nama" {% if sort == '-nama' %}selected{% endif %}>Nama Barang (Z-A)</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </details>
+            </div>
+        </form>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Kode Barang</th>
+                <th>Kategori</th>
+                <th>Nama Barang</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in page_obj %}
+            <tr>
+                <td style="font-weight: 600;">{{ item.kd_barang }}</td>
+                <td>{{ item.nama_kategori }}</td>
+                <td>{{ item.nama|default:"-" }}</td>
+                <td>
+                    {% if item.status == '1' %}
+                        <span style="padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 980px; color: #34c759; background-color: rgba(52, 199, 89, 0.1);">Aktif</span>
+                    {% elif item.status == '0' %}
+                        <span style="padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 980px; color: #ff3b30; background-color: rgba(255, 59, 48, 0.1);">Nonaktif</span>
+                    {% elif item.status == '2' %}
+                        <span style="padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 980px; color: #ffcc00; background-color: rgba(255, 204, 0, 0.1);">No Display</span>
+                    {% else %}
+                        <span style="padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 980px; color: var(--color-body-muted); background-color: var(--color-surface-pearl);">{{ item.status|default:"-" }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--color-body-muted);">Data barang tidak ditemukan.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; color: var(--color-body-muted); font-size: 14px;">
+        <span>Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}</span>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if query %}&q={{ query }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_kategori %}&kategori={{ filter_kategori }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="btn-ghost" style="padding: 6px 12px; font-size: 12px;">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_kategori %}&kategori={{ filter_kategori }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="btn-ghost" style="padding: 6px 12px; font-size: 12px;">Prev</a>
+            {% endif %}
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_kategori %}&kategori={{ filter_kategori }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="btn-ghost" style="padding: 6px 12px; font-size: 12px;">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_kategori %}&kategori={{ filter_kategori }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="btn-ghost" style="padding: 6px 12px; font-size: 12px;">Last &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

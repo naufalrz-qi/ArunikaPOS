@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Servers | Arunika POS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+        <h1>Kelola Server</h1>
+        <p>Daftar server MSSQL yang dikonfigurasi</p>
+    </div>
+    <a href="{% url 'server_add' %}" class="btn-accent">+ Tambah Server</a>
+</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>Tipe</th>
+                <th>Host:Port</th>
+                <th>Database</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for server in servers %}
+            <tr>
+                <td style="font-weight: 600;">{{ server.nama }}</td>
+                <td style="text-transform: uppercase;">{{ server.tipe }}</td>
+                <td>{{ server.host }}:{{ server.port }}</td>
+                <td>{{ server.db_name }}</td>
+                <td style="color: {% if server.is_active %}#34c759{% else %}var(--color-body-muted){% endif %}; font-weight: 600;">
+                    {% if server.is_active %}● AKTIF{% else %}● NONAKTIF{% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'server_edit' server.id %}" class="btn-ghost">Edit</a>
+                    <button class="btn-ghost test-btn" data-id="{{ server.id }}">Test</button>
+                    <a href="{% url 'server_delete' server.id %}" class="btn-ghost danger">Hapus</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" style="text-align: center; color: var(--color-body-muted);">Belum ada server.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.querySelectorAll('.test-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const serverId = this.getAttribute('data-id');
+        const originalText = this.innerText;
+        this.innerText = 'Testing...';
+        fetch(`/server/${serverId}/test/`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Berhasil terhubung ke server! ' + data.message, 'success');
+                } else {
+                    showToast('Gagal terhubung: ' + data.message, 'error');
+                }
+                this.innerText = originalText;
+            }).catch(e => {
+                showToast('Kesalahan sistem saat menghubungi server lokal.', 'error');
+                this.innerText = originalText;
+            });
+    });
+});
+</script>
+{% endblock %}

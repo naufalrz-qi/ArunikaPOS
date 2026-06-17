@@ -1,0 +1,206 @@
+:root {
+  --color-primary: #0066cc;
+  --color-primary-focus: #0071e3;
+  --color-ink: #1d1d1f;
+  --color-body-muted: #86868b;
+  --color-canvas: #ffffff;
+  --color-canvas-parchment: #f5f5f7;
+  --color-surface-pearl: #fafafc;
+  --color-hairline: #d2d2d7;
+  --color-divider-soft: #f0f0f0;
+  
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-canvas-parchment);
+  color: var(--color-ink);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.47;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-ink);
+  margin-top: 0;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: 56px; line-height: 1.07; }
+h2 { font-size: 40px; line-height: 1.10; }
+h3 { font-size: 28px; line-height: 1.14; }
+h4 { font-size: 21px; line-height: 1.19; }
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+a:hover {
+  color: var(--color-primary-focus);
+}
+
+/* Buttons */
+.btn-accent {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 400;
+  border: none;
+  border-radius: 980px; /* Fully rounded pill */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
+}
+.btn-accent:hover {
+  background-color: var(--color-primary-focus);
+  color: #ffffff;
+}
+
+.btn-ghost {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--color-ink);
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  border: none;
+  border-radius: 980px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
+}
+.btn-ghost:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: var(--color-ink);
+}
+.btn-ghost.danger {
+  color: #e30000;
+  background-color: rgba(227, 0, 0, 0.05);
+}
+.btn-ghost.danger:hover {
+  background-color: rgba(227, 0, 0, 0.1);
+}
+
+/* Cards & Surfaces */
+.card {
+  background-color: var(--color-canvas);
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  margin-bottom: 24px;
+}
+
+/* Navigation Header */
+.header {
+  position: sticky;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px;
+  z-index: 1000;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.header .logo a {
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.header .right-nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.header .right-nav a {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-ink);
+  padding: 8px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.header .right-nav a:hover {
+  opacity: 1;
+}
+
+/* Container */
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 56px 24px;
+}
+
+/* Forms */
+input, select, textarea {
+  background-color: var(--color-surface-pearl);
+  border: 1px solid var(--color-hairline);
+  color: var(--color-ink);
+  padding: 14px 16px;
+  font-family: var(--font-family);
+  font-size: 16px;
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 32px;
+  font-size: 14px;
+}
+th {
+  font-weight: 600;
+  color: var(--color-body-muted);
+  border-bottom: 1px solid var(--color-hairline);
+  padding: 12px 16px;
+  text-align: left;
+}
+td {
+  padding: 16px;
+  border-bottom: 1px solid var(--color-divider-soft);
+}
+tr:hover td {
+  background-color: var(--color-surface-pearl);
+}
+
+/* Dashboard Header */
+.dashboard-header {
+  margin-bottom: 48px;
+}
+.dashboard-header h1 {
+  margin-bottom: 8px;
+}
+.dashboard-header p {
+  color: var(--color-body-muted);
+  font-size: 17px;
+  margin: 0;
+}

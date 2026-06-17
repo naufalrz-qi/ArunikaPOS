@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Arunika POS{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .hamburger-icon {
+            width: 24px;
+            height: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .hamburger-icon span {
+            display: block;
+            height: 2px;
+            background-color: white;
+            width: 100%;
+        }
+        .right-nav {
+            display: flex;
+            gap: 24px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <a href="{% url 'dashboard' %}">Arunika POS</a>
+        </div>
+        <div class="right-nav">
+            {% if user.is_authenticated %}
+                <a href="{% url 'server_list' %}">SERVERS</a>
+                <a href="{% url 'user_list' %}">USERS</a>
+                <a href="{% url 'sync_control' %}">SYNC</a>
+                <a href="{% url 'sync_log' %}">LOGS</a>
+                <a href="{% url 'sync_harga' %}">HARGA</a>
+                <a href="{% url 'barang_list' %}">BARANG</a>
+                <a href="{% url 'kategori_list' %}">KATEGORI</a>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-ghost" style="padding: 8px 12px; margin-left: 8px;">LOGOUT</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-accent">LOGIN</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            <div class="messages" style="margin-bottom: 32px;">
+                {% for message in messages %}
+                <div style="padding: 16px; background-color: var(--color-surface-pearl); border-left: 4px solid var(--color-primary); border-radius: 8px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Global Toast Container -->
+    <div id="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 10000; display: flex; flex-direction: column; gap: 8px;"></div>
+
+    <script>
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        
+        let bgColor = 'var(--color-surface-pearl)';
+        let borderColor = 'var(--color-primary)';
+        let textColor = 'var(--color-ink)';
+        
+        if (type === 'error') {
+            borderColor = '#ff3b30';
+        } else if (type === 'warning') {
+            borderColor = '#ff9500';
+        } else if (type === 'success') {
+            borderColor = '#34c759';
+        }
+
+        toast.style.cssText = `
+            background-color: ${bgColor};
+            color: ${textColor};
+            border-left: 4px solid ${borderColor};
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 400px;
+            word-wrap: break-word;
+        `;
+        
+        toast.innerText = message;
+        container.appendChild(toast);
+        
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        });
+        
+        // Remove after 4 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+    </script>
+</body>
+</html>
