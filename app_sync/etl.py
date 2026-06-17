@@ -79,7 +79,7 @@ def _upsert_batch_csv(model, rows, columns, field_map, pk_field, server, new_che
     temp_table = f"{table_name}_temp"
     
     with connection.cursor() as cursor:
-        cursor.execute(f'CREATE UNLOGGED TABLE IF NOT EXISTS "{temp_table}" (LIKE "{table_name}" INCLUDING DEFAULTS)')
+        cursor.execute(f'CREATE TEMP TABLE IF NOT EXISTS "{temp_table}" (LIKE "{table_name}" INCLUDING DEFAULTS)')
         cursor.execute(f'TRUNCATE "{temp_table}"')
         
         quoted_csv_cols = [f'"{c}"' for c in csv_cols]
