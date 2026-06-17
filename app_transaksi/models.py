@@ -213,7 +213,7 @@ class MutasiStok(SyncMetaMixin):
         db_table = 't_mutasi_stok'
 
 class MutasiStokDetail(SyncMetaMixin):
-    no_transaksi = models.CharField(primary_key=True, max_length=20)
+    no_transaksi = models.CharField(max_length=20)
     kd_barang = models.CharField(max_length=30)
     kd_satuan = models.CharField(max_length=6)
     qty = models.FloatField()
@@ -261,7 +261,7 @@ class PegawaiGantiShift(SyncMetaMixin):
         db_table = 't_pegawai_ganti_shift'
 
 class PegawaiGantiShiftDetail(SyncMetaMixin):
-    no_transaksi = models.CharField(primary_key=True, max_length=8)
+    no_transaksi = models.CharField(max_length=8)
     kd_pegawai = models.CharField(max_length=6)
     kd_shift = models.CharField(max_length=6)
 
@@ -296,7 +296,7 @@ class PegawaiLembur(SyncMetaMixin):
         db_table = 't_pegawai_lembur'
 
 class PegawaiLemburDetail(SyncMetaMixin):
-    no_transaksi = models.CharField(primary_key=True, max_length=20)
+    no_transaksi = models.CharField(max_length=20)
     kd_pegawai = models.CharField(max_length=6)
 
     class Meta:
@@ -325,7 +325,7 @@ class PemakaianBarang(SyncMetaMixin):
         db_table = 't_pemakaian_barang'
 
 class PemakaianBarangDetail(SyncMetaMixin):
-    no_transaksi = models.CharField(primary_key=True, max_length=20)
+    no_transaksi = models.CharField(max_length=20)
     kd_barang = models.CharField(max_length=30)
     kd_satuan = models.CharField(max_length=6)
     qty = models.FloatField(null=True, blank=True)
@@ -415,7 +415,7 @@ class PembelianOrder(SyncMetaMixin):
 
 class PembelianOrderDetail(SyncMetaMixin):
     no_order = models.CharField(max_length=50)
-    kd_barang = models.CharField(primary_key=True, max_length=30)
+    kd_barang = models.CharField(max_length=30)
     kd_satuan = models.CharField(max_length=6)
     jenis = models.CharField(max_length=1)
     qty = models.FloatField()
@@ -480,7 +480,7 @@ class PembelianRetur(SyncMetaMixin):
         db_table = 't_pembelian_retur'
 
 class PembelianReturDetail(SyncMetaMixin):
-    no_retur = models.CharField(primary_key=True, max_length=20)
+    no_retur = models.CharField(max_length=20)
     kd_barang = models.CharField(max_length=30)
     kd_satuan = models.CharField(max_length=6)
     qty = models.FloatField()
@@ -566,7 +566,7 @@ class PenjualanDetail(SyncMetaMixin):
         db_table = 't_penjualan_detail'
 
 class PenjualanDetailPegawai(SyncMetaMixin):
-    no_transaksi = models.CharField(primary_key=True, max_length=20)
+    no_transaksi = models.CharField(max_length=20)
     kd_pegawai = models.CharField(max_length=6)
 
     class Meta:
@@ -596,7 +596,7 @@ class PenjualanJasa(SyncMetaMixin):
         db_table = 't_penjualan_jasa'
 
 class PenjualanJasaDetail(SyncMetaMixin):
-    no_transaksi = models.CharField(primary_key=True, max_length=20)
+    no_transaksi = models.CharField(max_length=20)
     kd_pegawai = models.CharField(max_length=6)
     kd_jasa = models.CharField(max_length=6)
     qty = models.FloatField()
@@ -651,7 +651,7 @@ class PenjualanOrder(SyncMetaMixin):
         db_table = 't_penjualan_order'
 
 class PenjualanOrderDetail(SyncMetaMixin):
-    no_order = models.CharField(primary_key=True, max_length=20)
+    no_order = models.CharField(max_length=20)
     kd_barang = models.CharField(max_length=30)
     kd_satuan = models.CharField(max_length=6)
     kd_pegawai = models.CharField(max_length=10)
@@ -854,7 +854,7 @@ class TransaksiBarang(SyncMetaMixin):
         db_table = 't_transaksi_barang'
 
 class TransaksiBarangDetail(SyncMetaMixin):
-    no_transaksi = models.CharField(primary_key=True, max_length=20)
+    no_transaksi = models.CharField(max_length=20)
     kd_barang = models.CharField(max_length=30)
     kd_satuan = models.CharField(max_length=6)
     qty = models.FloatField()
