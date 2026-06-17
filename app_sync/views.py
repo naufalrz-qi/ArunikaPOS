@@ -185,3 +185,19 @@ def get_server_tables(request):
         return JsonResponse({'success': True, 'tables': tables_info})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)})
+
+@login_required
+def clear_queue(request):
+    if request.method == 'POST':
+        try:
+            from django_q.models import OrmQ
+            from app_core.models import SyncLog
+            
+            OrmQ.objects.all().delete()
+            SyncLog.objects.filter(status='running').update(status='cancelled')
+            
+            return JsonResponse({'success': True, 'message': 'Antrean berhasil dibersihkan!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+            
+    return JsonResponse({'success': False, 'message': 'Invalid request'})
