@@ -148,3 +148,50 @@ def empty_database(request):
             return JsonResponse({'success': False, 'message': str(e)})
             
     return JsonResponse({'success': False, 'message': 'Invalid request'})
+
+@login_required
+def get_server_tables(request):
+    import json
+    from app_core.models import ServerConfig
+    from app_sync.connectors import get_mssql_connection
+    from app_sync.tasks import ALLOWED_TABLES
+    
+    server_id = request.GET.get('server_id')
+    if not server_id or server_id == 'all':
+        return JsonResponse({'success': False, 'message': 'Pilih satu server tertentu.'})
+        
+    try:
+        server = ServerConfig.objects.get(pk=server_id)
+        conn = get_mssql_connection(server)
+        cursor = conn.cursor()
+        
+        query = """
+        SELECT
+            t.NAME AS TableName,
+            SUM(p.rows) AS RowCounts
+        FROM
+            sys.tables t
+        INNER JOIN
+            sys.partitions p ON t.object_id = p.OBJECT_ID
+        WHERE
+            p.index_id IN (0,1)
+        GROUP BY
+            t.NAME
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        tables_info = []
+        for row in rows:
+            table_name = row.TableName
+            if table_name in ALLOWED_TABLES:
+                tables_info.append({
+                    'name': table_name,
+                    'count': row.RowCounts
+                })
+        
+        tables_info.sort(key=lambda x: x['name'])
+        
+        return JsonResponse({'success': True, 'tables': tables_info})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})

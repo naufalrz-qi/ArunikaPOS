@@ -199,6 +199,7 @@
                     <option value="">Tidak ada perangkat</option>
                 {% endfor %}
             </select>
+            <button onclick="checkServerData()" class="apple-pill-btn-outline" style="width: 100%; margin-top: 16px; font-size: 14px; padding: 8px;">Cek Tabel & Row Server</button>
         </div>
 
         <div class="apple-card">
@@ -273,6 +274,56 @@
 <script>
 let pollInterval;
 let activeTaskIds = [];
+
+function checkServerData() {
+    const serverId = document.getElementById('server-select').value;
+    if (!serverId || serverId === 'all') {
+        if(typeof Swal !== 'undefined') Swal.fire('Peringatan', 'Pilih satu server target tertentu terlebih dahulu.', 'warning');
+        else alert('Pilih satu server target tertentu terlebih dahulu.');
+        return;
+    }
+
+    Swal.fire({
+        title: 'Mengambil Data Server...',
+        text: 'Harap tunggu.',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch(`/sync/server_tables/?server_id=${serverId}`)
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success) {
+            Swal.fire('Error', data.message || 'Gagal mengambil data dari server.', 'error');
+            return;
+        }
+        
+        let html = '<div style="max-height: 400px; overflow-y: auto; text-align: left;"><table style="width: 100%; border-collapse: collapse;">';
+        html += '<tr style="border-bottom: 1px solid var(--apple-hairline);"><th style="padding: 8px;">Nama Tabel</th><th style="padding: 8px; text-align: right;">Jumlah Baris</th></tr>';
+        
+        let totalRows = 0;
+        data.tables.forEach(t => {
+            html += `<tr style="border-bottom: 1px solid var(--apple-hairline);"><td style="padding: 8px; font-family: monospace; font-size: 13px;">${t.name}</td><td style="padding: 8px; text-align: right; font-variant-numeric: tabular-nums;">${t.count}</td></tr>`;
+            totalRows += t.count;
+        });
+        
+        html += `<tr><td style="padding: 8px; font-weight: bold;">TOTAL</td><td style="padding: 8px; text-align: right; font-weight: bold; font-variant-numeric: tabular-nums;">${totalRows}</td></tr>`;
+        html += '</table></div>';
+        
+        Swal.fire({
+            title: 'Data Tabel Server',
+            html: html,
+            width: '600px',
+            confirmButtonColor: 'var(--apple-primary)',
+            confirmButtonText: 'Tutup'
+        });
+    })
+    .catch(err => {
+        Swal.fire('Error', 'Koneksi terputus saat mengambil data.', 'error');
+    });
+}
 
 function startSync(type) {
     const serverId = document.getElementById('server-select').value;
