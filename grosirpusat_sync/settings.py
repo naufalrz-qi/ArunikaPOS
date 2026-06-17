@@ -97,7 +97,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django-Q2 Configuration
 Q_CLUSTER = {
     'name': 'grosirpusat_q',
-    'workers': 4,
+    'workers': 1,
     'recycle': 500,
     'timeout': 3600,
     'compress': True,

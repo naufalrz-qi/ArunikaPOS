@@ -105,7 +105,7 @@ def task_full_sync(log_id: int, server_id: int):
             if isinstance(obj, type) and issubclass(obj, models.Model) and obj.__module__ == 'app_master.models':
                 if hasattr(obj, '_meta') and not obj._meta.abstract:
                     table_name = obj._meta.db_table
-                    if table_name.startswith('m_') or table_name == 'g_tutup_buku':
+                    if table_name.startswith('m_'):
                         pk_field = obj._meta.pk.name
                         SYNC_ORDER.append((table_name, obj, pk_field))
         
@@ -114,16 +114,11 @@ def task_full_sync(log_id: int, server_id: int):
             log.details = {tbl: {'current': 0, 'total': 0, 'status': 'pending'} for tbl, _, _ in SYNC_ORDER}
             log.save(update_fields=['details'])
             
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = []
-            for tbl, model, pk in SYNC_ORDER:
-                futures.append(executor.submit(
-                    sync_checksum_compare, server, tbl, model, pk, 
-                    progress_callback=lambda c, t, tbl_name=tbl: _update_progress(log, c, t, tbl_name)
-                ))
-            
-            for future in as_completed(futures):
-                future.result()
+        for tbl, model, pk in SYNC_ORDER:
+            sync_checksum_compare(
+                server, tbl, model, pk, 
+                progress_callback=lambda c, t, tbl_name=tbl: _update_progress(log, c, t, tbl_name)
+            )
 
         # Mark all as done
         log.refresh_from_db()
@@ -153,18 +148,13 @@ def task_auto_sync(log_id: int, server_id: int, start_date=None, end_date=None):
             log.details = {model._meta.db_table: {'current': 0, 'total': 0, 'status': 'pending'} for model, _, _, _ in TRANSAKSI_SYNC_ORDER}
             log.save(update_fields=['details'])
             
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            futures = []
-            for model, pk, date_field, details in TRANSAKSI_SYNC_ORDER:
-                tbl = model._meta.db_table
-                futures.append(executor.submit(
-                    sync_incremental, server, tbl, model, pk,
-                    start_date, end_date, date_field, details,
-                    lambda c, t, tbl_name=tbl: _update_progress(log, c, t, tbl_name)
-                ))
-            
-            for future in as_completed(futures):
-                future.result()
+        for model, pk, date_field, details in TRANSAKSI_SYNC_ORDER:
+            tbl = model._meta.db_table
+            sync_incremental(
+                server, tbl, model, pk,
+                start_date, end_date, date_field, details,
+                lambda c, t, tbl_name=tbl: _update_progress(log, c, t, tbl_name)
+            )
         
         # Mark all as done
         log.refresh_from_db()
