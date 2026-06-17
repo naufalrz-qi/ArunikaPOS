@@ -32,3 +32,9 @@ ENV/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Temp and data files
+*.csv
+temp/
+tmp/
+*.tmp
