@@ -152,7 +152,6 @@ def empty_database(request):
 @login_required
 def get_server_tables(request):
     from django.apps import apps
-    from app_sync.tasks import ALLOWED_TABLES
     
     server_id = request.GET.get('server_id')
     if not server_id or server_id == 'all':
@@ -164,8 +163,7 @@ def get_server_tables(request):
             app_config = apps.get_app_config(app_label)
             for model in app_config.get_models():
                 table_name = model._meta.db_table
-                if table_name in ALLOWED_TABLES:
-                    # Filter based on server_id since all these models inherit from SyncMetaMixin
+                if hasattr(model, 'server'):
                     count = model.objects.filter(server_id=server_id).count()
                     if count > 0:
                         tables_info.append({
@@ -173,7 +171,6 @@ def get_server_tables(request):
                             'count': count
                         })
                     else:
-                        # Include empty tables too if they want to see everything
                         tables_info.append({
                             'name': table_name,
                             'count': 0

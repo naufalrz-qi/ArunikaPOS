@@ -11,20 +11,6 @@ sync_lock = threading.Lock()
 from django.conf import settings
 import os
 
-def _get_allowed_tables():
-    allowed = set()
-    try:
-        path = os.path.join(settings.BASE_DIR, 'strukturdatabase_GrosirPusat.txt')
-        with open(path, 'r', encoding='utf-8') as f:
-            for line in f:
-                parts = line.strip().split('\t')
-                if parts:
-                    allowed.add(parts[0].strip())
-    except Exception:
-        pass
-    return allowed
-
-ALLOWED_TABLES = _get_allowed_tables()
 
 TRANSAKSI_SYNC_ORDER = [
     (trx_models.Absensi, 'id', 'tanggal_server', []),
@@ -68,7 +54,7 @@ TRANSAKSI_SYNC_ORDER = [
     (trx_models.Sewa, 'no_transaksi', 'tanggal', []),
 ]
 
-TRANSAKSI_SYNC_ORDER = [t for t in TRANSAKSI_SYNC_ORDER if t[0]._meta.db_table in ALLOWED_TABLES]
+
 
 def _update_progress(log: SyncLog, current: int, total: int, tbl_name: str = ''):
     """Update progress di DB untuk polling frontend."""
@@ -120,9 +106,8 @@ def task_full_sync(log_id: int, server_id: int):
                 if hasattr(obj, '_meta') and not obj._meta.abstract:
                     table_name = obj._meta.db_table
                     if table_name.startswith('m_') or table_name == 'g_tutup_buku':
-                        if table_name in ALLOWED_TABLES:
-                            pk_field = obj._meta.pk.name
-                            SYNC_ORDER.append((table_name, obj, pk_field))
+                        pk_field = obj._meta.pk.name
+                        SYNC_ORDER.append((table_name, obj, pk_field))
         
         # Initialize details
         if not log.details:
