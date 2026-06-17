@@ -105,7 +105,7 @@ def _sync_details_for_headers_csv(cursor_odbc, detail_table, detail_model, fk_fi
         return
         
     d_field_map = get_field_map(detail_model)
-    chunk_size = 5000
+    chunk_size = 1000
     
     for i in range(0, len(header_pks), chunk_size):
         chunk_pks = header_pks[i:i+chunk_size]
