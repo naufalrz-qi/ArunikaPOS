@@ -80,6 +80,7 @@ def _upsert_batch_csv(model, rows, columns, field_map, pk_field, server, new_che
     
     with connection.cursor() as cursor:
         cursor.execute(f'CREATE TEMP TABLE IF NOT EXISTS "{temp_table}" (LIKE "{table_name}" INCLUDING DEFAULTS)')
+        cursor.execute(f'ALTER TABLE "{temp_table}" DROP COLUMN IF EXISTS "id"')
         cursor.execute(f'TRUNCATE "{temp_table}"')
         
         quoted_csv_cols = [f'"{c}"' for c in csv_cols]
@@ -100,6 +101,65 @@ def _upsert_batch_csv(model, rows, columns, field_map, pk_field, server, new_che
         cursor.execute(upsert_query)
         cursor.execute(f'DROP TABLE "{temp_table}"')
 
+def _insert_details_batch_csv(model, rows, columns, field_map, fk_field, chunk_pks, server):
+    if not rows: return
+    
+    db_cols = [col for col in columns if col in field_map]
+    csv_cols = db_cols + ['_sync_server_id', '_sync_checksum', '_sync_created', '_sync_updated']
+    
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(csv_cols)
+    
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    for row in rows:
+        row_dict = dict(zip(columns, row))
+        out_row = []
+        for col in db_cols:
+            val = row_dict[col]
+            if val is None:
+                out_row.append(r'\N')
+            elif isinstance(val, (datetime.datetime, datetime.date)):
+                out_row.append(val.strftime('%Y-%m-%d %H:%M:%S'))
+            elif isinstance(val, bool):
+                out_row.append('t' if val else 'f')
+            elif isinstance(val, bytes):
+                out_row.append('')
+            elif isinstance(val, str):
+                out_row.append(val.replace('\x00', ''))
+            else:
+                out_row.append(str(val))
+                
+        out_row.append(str(server.pk))
+        out_row.append('')
+        out_row.append(now)
+        out_row.append(now)
+        
+        writer.writerow(out_row)
+        
+    buffer.seek(0)
+    table_name = model._meta.db_table
+    temp_table = f"{table_name}_temp"
+    
+    with connection.cursor() as cursor:
+        cursor.execute(f'CREATE TEMP TABLE IF NOT EXISTS "{temp_table}" (LIKE "{table_name}" INCLUDING DEFAULTS)')
+        cursor.execute(f'ALTER TABLE "{temp_table}" DROP COLUMN IF EXISTS "id"')
+        cursor.execute(f'TRUNCATE "{temp_table}"')
+        
+        quoted_csv_cols = [f'"{c}"' for c in csv_cols]
+        cols_str = ','.join(quoted_csv_cols)
+        
+        copy_sql = f'COPY "{temp_table}" ({cols_str}) FROM STDIN WITH (FORMAT CSV, HEADER TRUE, NULL \'\\N\')'
+        cursor.copy_expert(copy_sql, buffer)
+        
+        format_strings = ','.join(['%s'] * len(chunk_pks))
+        cursor.execute(f'DELETE FROM "{table_name}" WHERE "{fk_field}" IN ({format_strings}) AND "_sync_server_id" = %s', tuple(chunk_pks) + (server.pk,))
+        
+        insert_query = f'INSERT INTO "{table_name}" ({cols_str}) SELECT {cols_str} FROM "{temp_table}"'
+        cursor.execute(insert_query)
+        cursor.execute(f'DROP TABLE "{temp_table}"')
+
 def _sync_details_for_headers_csv(cursor_odbc, detail_table, detail_model, fk_field, header_pks, server):
     if not header_pks:
         return
@@ -114,7 +174,7 @@ def _sync_details_for_headers_csv(cursor_odbc, detail_table, detail_model, fk_fi
         d_rows = cursor_odbc.fetchall()
         if d_rows:
             d_columns = [col[0] for col in cursor_odbc.description]
-            _upsert_batch_csv(detail_model, d_rows, d_columns, d_field_map, fk_field, server)
+            _insert_details_batch_csv(detail_model, d_rows, d_columns, d_field_map, fk_field, chunk_pks, server)
 
 def sync_incremental(server, table_name: str, model: Type[Model], pk_field: str, start_date=None, end_date=None, date_field='tanggal_server', detail_syncs=None, progress_callback=None):
     from app_core.models import SyncLog
