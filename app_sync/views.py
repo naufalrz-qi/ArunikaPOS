@@ -151,9 +151,7 @@ def empty_database(request):
 
 @login_required
 def get_server_tables(request):
-    import json
-    from app_core.models import ServerConfig
-    from app_sync.connectors import get_mssql_connection
+    from django.apps import apps
     from app_sync.tasks import ALLOWED_TABLES
     
     server_id = request.GET.get('server_id')
@@ -161,34 +159,25 @@ def get_server_tables(request):
         return JsonResponse({'success': False, 'message': 'Pilih satu server tertentu.'})
         
     try:
-        server = ServerConfig.objects.get(pk=server_id)
-        with get_mssql_connection(server) as conn:
-            cursor = conn.cursor()
-            
-            query = """
-            SELECT
-                t.NAME AS TableName,
-                SUM(p.rows) AS RowCounts
-            FROM
-                sys.tables t
-            INNER JOIN
-                sys.partitions p ON t.object_id = p.OBJECT_ID
-            WHERE
-                p.index_id IN (0,1)
-            GROUP BY
-                t.NAME
-            """
-            cursor.execute(query)
-            rows = cursor.fetchall()
-        
         tables_info = []
-        for row in rows:
-            table_name = row.TableName
-            if table_name in ALLOWED_TABLES:
-                tables_info.append({
-                    'name': table_name,
-                    'count': row.RowCounts
-                })
+        for app_label in ['app_master', 'app_transaksi']:
+            app_config = apps.get_app_config(app_label)
+            for model in app_config.get_models():
+                table_name = model._meta.db_table
+                if table_name in ALLOWED_TABLES:
+                    # Filter based on server_id since all these models inherit from SyncMetaMixin
+                    count = model.objects.filter(server_id=server_id).count()
+                    if count > 0:
+                        tables_info.append({
+                            'name': table_name,
+                            'count': count
+                        })
+                    else:
+                        # Include empty tables too if they want to see everything
+                        tables_info.append({
+                            'name': table_name,
+                            'count': 0
+                        })
         
         tables_info.sort(key=lambda x: x['name'])
         
