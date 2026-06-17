@@ -162,24 +162,24 @@ def get_server_tables(request):
         
     try:
         server = ServerConfig.objects.get(pk=server_id)
-        conn = get_mssql_connection(server)
-        cursor = conn.cursor()
-        
-        query = """
-        SELECT
-            t.NAME AS TableName,
-            SUM(p.rows) AS RowCounts
-        FROM
-            sys.tables t
-        INNER JOIN
-            sys.partitions p ON t.object_id = p.OBJECT_ID
-        WHERE
-            p.index_id IN (0,1)
-        GROUP BY
-            t.NAME
-        """
-        cursor.execute(query)
-        rows = cursor.fetchall()
+        with get_mssql_connection(server) as conn:
+            cursor = conn.cursor()
+            
+            query = """
+            SELECT
+                t.NAME AS TableName,
+                SUM(p.rows) AS RowCounts
+            FROM
+                sys.tables t
+            INNER JOIN
+                sys.partitions p ON t.object_id = p.OBJECT_ID
+            WHERE
+                p.index_id IN (0,1)
+            GROUP BY
+                t.NAME
+            """
+            cursor.execute(query)
+            rows = cursor.fetchall()
         
         tables_info = []
         for row in rows:
