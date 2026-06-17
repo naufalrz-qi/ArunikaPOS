@@ -79,23 +79,26 @@ def _upsert_batch_csv(model, rows, columns, field_map, pk_field, server, new_che
     temp_table = f"{table_name}_temp"
     
     with connection.cursor() as cursor:
-        cursor.execute(f"CREATE UNLOGGED TABLE IF NOT EXISTS {temp_table} (LIKE {table_name} INCLUDING DEFAULTS)")
-        cursor.execute(f"TRUNCATE {temp_table}")
+        cursor.execute(f'CREATE UNLOGGED TABLE IF NOT EXISTS "{temp_table}" (LIKE "{table_name}" INCLUDING DEFAULTS)')
+        cursor.execute(f'TRUNCATE "{temp_table}"')
         
-        copy_sql = f"COPY {temp_table} ({','.join(csv_cols)}) FROM STDIN WITH (FORMAT CSV, HEADER TRUE, NULL '\\N')"
+        quoted_csv_cols = [f'"{c}"' for c in csv_cols]
+        cols_str = ','.join(quoted_csv_cols)
+        
+        copy_sql = f'COPY "{temp_table}" ({cols_str}) FROM STDIN WITH (FORMAT CSV, HEADER TRUE, NULL \'\\N\')'
         cursor.copy_expert(copy_sql, buffer)
         
         update_cols = [col for col in csv_cols if col != pk_field]
-        set_clause = ', '.join([f"{col} = EXCLUDED.{col}" for col in update_cols])
+        set_clause = ', '.join([f'"{col}" = EXCLUDED."{col}"' for col in update_cols])
         
         upsert_query = f"""
-            INSERT INTO {table_name} ({','.join(csv_cols)})
-            SELECT {','.join(csv_cols)} FROM {temp_table}
-            ON CONFLICT ({pk_field}) 
+            INSERT INTO "{table_name}" ({cols_str})
+            SELECT {cols_str} FROM "{temp_table}"
+            ON CONFLICT ("{pk_field}") 
             DO UPDATE SET {set_clause}
         """
         cursor.execute(upsert_query)
-        cursor.execute(f"DROP TABLE {temp_table}")
+        cursor.execute(f'DROP TABLE "{temp_table}"')
 
 def _sync_details_for_headers_csv(cursor_odbc, detail_table, detail_model, fk_field, header_pks, server):
     if not header_pks:
